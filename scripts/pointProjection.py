@@ -9,6 +9,8 @@
 *   (at your option) any later version.                                   *
 *                                                                         *
 ***************************************************************************
+
+- latest changes : 2022-01-24
 """
 
 from qgis.PyQt.QtCore import QCoreApplication
@@ -43,43 +45,31 @@ class PointProjection(QgsProcessingAlgorithm):
 
     def name(self):
         """
-        Returns the algorithm name, used for identifying the algorithm. This
-        string should be fixed for the algorithm, and must not be localised.
-        The name should be unique within each provider. Names should contain
-        lowercase alphanumeric characters only and no spaces or other
-        formatting characters.
+        Returns the algorithm name, used for identifying the algorithm.
         """
         return 'point projection'
 
     def displayName(self):
         """
-        Returns the translated algorithm name, which should be used for any
-        user-visible display of the algorithm name.
+        Returns the translated algorithm name.
         """
         return self.tr('Point Projection')
 
     def group(self):
         """
-        Returns the name of the group this algorithm belongs to. This string
-        should be localised.
+        Returns the name of the group this algorithm belongs to.
         """
         return self.tr('rtm-tools')
 
     def groupId(self):
         """
-        Returns the unique ID of the group this algorithm belongs to. This
-        string should be fixed for the algorithm, and must not be localised.
-        The group id should be unique within each provider. Group id should
-        contain lowercase alphanumeric characters only and no spaces or other
-        formatting characters.
+        Returns the unique ID of the group this algorithm belongs to.
         """
         return 'rtm-tools'
 
     def shortHelpString(self):
         """
-        Returns a localised short helper string for the algorithm. This string
-        should provide a basic description about what the algorithm does and the
-        parameters and outputs associated with it..
+        Returns a localised short helper string for the algorithm.
         """
         help = """
         <html><body>
@@ -155,9 +145,6 @@ class PointProjection(QgsProcessingAlgorithm):
             )
         )
 
-        # We add a feature sink in which to store our processed features (this
-        # usually takes the form of a newly created vector layer when the
-        # algorithm is run in QGIS).
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 'OUTPUT',
