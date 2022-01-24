@@ -1,2 +1,1 @@
-# qgis
- Tools, Scripts and plugins for QGIS
+# Tools, scripts and plugins for QGIS
