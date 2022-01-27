@@ -13,6 +13,6 @@ Orthogonal projection of a point layer onto a line or multiline vector layer.
 - Fields to keep : Fields from the projected layer to be kept in the output layer.
 - Digital Terrain Model (DTM) : If provided, point layer features' Z value will be extracted from it. Else, the algorithm will try to extract the Z value of the point layer features' geometry.
 
-## Outputs
+## Output
 
 The output layer is a copy of the projected layer provided whose attribute table contains a new field 'dist' which corresponds to the curvilinear distance of the projected points onto the axis.
