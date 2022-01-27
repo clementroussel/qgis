@@ -77,7 +77,7 @@ class PolylineProjection(QgsProcessingAlgorithm):
         <p>Orthogonal projection of a line or multiline layer onto another line or multiline vector layer.<\p>
         <h2>Inputs<\h2>
         <p>Axis layer : Should contain a single line or multiline feature onto which points will be projected.<\p>
-        <p>Projected layer : Should contain a single line or multiline layer to be projected.<\p>
+        <p>Projected layer : Should contain a single line or multiline feature to be projected.<\p>
         <p>Digital Terrain Model (DTM) : If provided, projected layer vertices' Z value will be extracted from it. Else, the algorithm will try to extract the Z value of the projected layer vertices' geometry.<\p>
         <p><\p>
         <h2>Output<\h2>
