@@ -10,7 +10,7 @@
 *                                                                         *
 ***************************************************************************
 
-- latest changes : 2022-01-24
+- latest changes : 2022-01-27
 """
 
 from qgis.PyQt.QtCore import QCoreApplication
