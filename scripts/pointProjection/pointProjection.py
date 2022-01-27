@@ -59,13 +59,13 @@ class PointProjection(QgsProcessingAlgorithm):
         """
         Returns the name of the group this algorithm belongs to.
         """
-        return self.tr('rtm-tools')
+        return self.tr('tools')
 
     def groupId(self):
         """
         Returns the unique ID of the group this algorithm belongs to.
         """
-        return 'rtm-tools'
+        return 'tools'
 
     def shortHelpString(self):
         """
