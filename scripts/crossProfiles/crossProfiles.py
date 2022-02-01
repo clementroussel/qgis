@@ -221,9 +221,9 @@ class CrossProfiles(QgsProcessingAlgorithm):
                                             {'INPUT':cross_profiles,
                                              'OVERLAY':extent_layer,
                                              'OUTPUT':'TEMPORARY_OUTPUT'},
-                                           is_child_algorithm=True,
-                                           context=context,
-                                           feedback=feedback)['OUTPUT']
+                                            is_child_algorithm=True,
+                                            context=context,
+                                            feedback=feedback)['OUTPUT']
 
         # add regularly spaced vertices to the cross-profiles
         cross_profiles = processing.run("native:densifygeometriesgivenaninterval",
