@@ -225,7 +225,7 @@ class CrossProfiles(QgsProcessingAlgorithm):
                                         is_child_algorithm=True,
                                         context=context,
                                         feedback=feedback)['OUTPUT']
-
+        
         # clip the cross-profiles with the extent layer
         extent_layer = self.parameterAsVectorLayer(parameters, 'EXTENT', context)
 
@@ -254,10 +254,23 @@ class CrossProfiles(QgsProcessingAlgorithm):
                                          'BAND':parameters['DTM_BAND'],
                                          'NODATA':0,
                                          'SCALE':1,
+                                         'OUTPUT':'TEMPORARY_OUTPUT'},
+                                        is_child_algorithm=True,
+                                        context=context,
+                                        feedback=feedback)['OUTPUT'] 
+
+        # create a new field 'z min'
+        cross_profiles = processing.run("native:fieldcalculator",
+                                        {'INPUT':cross_profiles,
+                                         'FIELD_NAME':'z min',
+                                         'FIELD_TYPE':0,
+                                         'FIELD_LENGTH':10,
+                                         'FIELD_PRECISION':3,
+                                         'FORMULA':'z_min($geometry)',
                                          'OUTPUT':parameters['OUTPUT']},
                                         is_child_algorithm=True,
                                         context=context,
-                                        feedback=feedback)['OUTPUT']                               
+                                        feedback=feedback)['OUTPUT']                            
                                              
         # return the results of the algorithm
         return {'OUTPUT':cross_profiles}
