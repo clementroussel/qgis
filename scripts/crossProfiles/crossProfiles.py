@@ -56,13 +56,13 @@ class CrossProfiles(QgsProcessingAlgorithm):
         """
         Returns the name of the group this algorithm belongs to.
         """
-        return self.tr('tools')
+        return self.tr('onf-rtm-tools')
 
     def groupId(self):
         """
         Returns the unique ID of the group this algorithm belongs to.
         """
-        return 'tools'
+        return 'onf-rtm-tools'
 
     def shortHelpString(self):
         """
