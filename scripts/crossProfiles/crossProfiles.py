@@ -214,7 +214,7 @@ class CrossProfiles(QgsProcessingAlgorithm):
                                          'OUTPUT':0},
                                         is_child_algorithm=True,
                                         context=context,
-                                        feedback=feedback)['OUTPUT']
+                                        feedback=feedback)['PROFILES']
 
         # clip the cross-profiles with the extent layer
         extent_layer = self.parameterAsVectorLayer(parameters, 'EXTENT', context)
