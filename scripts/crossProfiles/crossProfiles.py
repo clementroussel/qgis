@@ -159,7 +159,7 @@ class CrossProfiles(QgsProcessingAlgorithm):
             QgsProcessingParameterDistance(
                 'SUBDIVISIONS',
                 self.tr('Profile subdivision distance'),
-                defaultValue=0.10,
+                defaultValue=0.25,
                 parentParameterName='AXIS_LAYER'
             )
         )
