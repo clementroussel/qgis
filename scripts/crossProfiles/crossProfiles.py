@@ -15,25 +15,20 @@
 
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterVectorLayer,
                        QgsProcessingParameterDistance,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterBand,
                        QgsProcessingParameterFeatureSink,
-                       QgsWkbTypes,
                        QgsVectorLayer)
 from qgis import processing
 
 
 class CrossProfiles(QgsProcessingAlgorithm):
     """
-    Here is the class documentation.
+    Here is the (missing) class documentation.
     """
 
     def tr(self, string):
@@ -76,15 +71,16 @@ class CrossProfiles(QgsProcessingAlgorithm):
         help = """
         <html><body>
         <h2>Description<\h2>
-        <p>Orthogonal projection of a point layer onto a line or multiline vector layer.<\p>
+        <p>Generate regularly spaced cross-profiles along an axis.<\p>
         <h2>Inputs<\h2>
-        <p>Axis layer : Should contain a single line or multiline feature onto which points will be projected.<\p>
-        <p>Projected layer : Point layer to be projected.<\p>
-        <p>Fields to keep : Fields from the projected layer to be kept in the output layer.<\p>
-        <p>Digital Terrain Model (DTM) : If provided, point layer features' Z value will be extracted from it. Else, the algorithm will try to extract the Z value of the point layer features' geometry.<\p>
-        <p><\p>
+        <p>Axis layer : Should contain a single line or multiline feature.<\p>
+        <p>Distance between two profiles : self-explained.<\p>
+        <p>Profiles length : self-explained.<\p>
+        <p>Extent layer : If provided, cross-profiles will be ajusted according to this layer.<\p>
+        <p>Profiles subdivision length : Cross-profiles geometries are densified by adding additional vertices. This value indicates the maximum distance between two consecutive vertices.<\p>
+        <p>Digital Terrain Model (DTM) : Cross-profiles vertices Z value will be extracted from it.<\p>
         <h2>Output<\h2>
-        <p>The output layer is a copy of the projected layer provided whose attribute table contains a new field 'dist' which corresponds to the curvilinear distance of the projected points onto the axis.<\p>
+        <p>Cross-profiles layer.<\p>
         <\body><\html>
         """
         return self.tr(help)
@@ -137,6 +133,15 @@ class CrossProfiles(QgsProcessingAlgorithm):
                 optional=True
             )
         )
+
+        self.addParameter(
+            QgsProcessingParameterDistance(
+                'SUBDIVISIONS',
+                self.tr('Profiles subdivision length'),
+                defaultValue=0.25,
+                parentParameterName='AXIS_LAYER'
+            )
+        )
         
         self.addParameter(
             QgsProcessingParameterRasterLayer(
@@ -152,15 +157,6 @@ class CrossProfiles(QgsProcessingAlgorithm):
                 self.tr('DTM Raster Band'),
                 defaultValue=1,
                 parentLayerParameterName='DTM'
-            )
-        )
-
-        self.addParameter(
-            QgsProcessingParameterDistance(
-                'SUBDIVISIONS',
-                self.tr('Profile subdivision distance'),
-                defaultValue=0.25,
-                parentParameterName='AXIS_LAYER'
             )
         )
 
