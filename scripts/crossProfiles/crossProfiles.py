@@ -80,7 +80,7 @@ class CrossProfiles(QgsProcessingAlgorithm):
         <p>Profiles subdivision length : Cross-profiles geometries are densified by adding additional vertices. This value indicates the maximum distance between two consecutive vertices.<\p>
         <p>Digital Terrain Model (DTM) : Cross-profiles vertices Z value will be extracted from it.<\p>
         <h2>Output<\h2>
-        <p>Cross-profiles layer.<\p>
+        <p>A cross-profiles layer whose attribute table contains a field 'dist' and a field 'z min' that can be used to approximate a longitudinal profile.<\p>
         <\body><\html>
         """
         return self.tr(help)
