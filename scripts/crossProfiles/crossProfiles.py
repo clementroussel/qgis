@@ -26,7 +26,8 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterBand,
                        QgsProcessingParameterFeatureSink,
-                       QgsWkbTypes)
+                       QgsWkbTypes,
+                       QgsVectorLayer)
 from qgis import processing
 
 
@@ -219,7 +220,7 @@ class CrossProfiles(QgsProcessingAlgorithm):
         # clip the cross-profiles with the extent layer
         extent_layer = self.parameterAsVectorLayer(parameters, 'EXTENT', context)
 
-        if extent_layer.isValid():
+        if isinstance(extent_layer, QgsVectorLayer):
             cross_profiles = processing.run("native:clip",
                                             {'INPUT':cross_profiles,
                                              'OVERLAY':extent_layer,
@@ -244,7 +245,7 @@ class CrossProfiles(QgsProcessingAlgorithm):
                                          'BAND':parameters['DTM_BAND'],
                                          'NODATA':0,
                                          'SCALE':1,
-                                         'OUTPUT':'TEMPORARY_OUTPUT'},
+                                         'OUTPUT':parameters['OUTPUT']},
                                         is_child_algorithm=True,
                                         context=context,
                                         feedback=feedback)['OUTPUT']                               
