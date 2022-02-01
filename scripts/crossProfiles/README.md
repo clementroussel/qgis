@@ -1,4 +1,4 @@
-# cross profiles script
+# cross-profiles script
 
 ---
 
