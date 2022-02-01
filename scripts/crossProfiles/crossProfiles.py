@@ -220,7 +220,7 @@ class CrossProfiles(QgsProcessingAlgorithm):
                                          'FIELD_TYPE':0,
                                          'FIELD_LENGTH':10,
                                          'FIELD_PRECISION':3,
-                                         'FORMULA':' \"ID\" * '+str(parameters['DIST_BETWEEN_PROFILES']),
+                                         'FORMULA':' (\"ID\" - 1) * '+str(parameters['DIST_BETWEEN_PROFILES']),
                                          'OUTPUT':'TEMPORARY_OUTPUT'},
                                         is_child_algorithm=True,
                                         context=context,
