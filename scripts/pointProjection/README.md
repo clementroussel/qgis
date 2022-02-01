@@ -7,7 +7,7 @@
 Orthogonal projection of a point layer onto a line or multiline vector layer.
 
 <p align="center">
-![point projection](pointProjection_figure.png)
+    ![point projection](pointProjection_figure.png)
 </p>
 
 ## Inputs
