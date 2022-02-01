@@ -114,6 +114,15 @@ class CrossProfiles(QgsProcessingAlgorithm):
             QgsProcessingParameterDistance(
                 'DIST_BETWEEN_PROFILES',
                 self.tr('Distance between two profiles'),
+                defaultValue=100,
+                parentParameterName='AXIS_LAYER'
+            )
+        )
+        
+        self.addParameter(
+            QgsProcessingParameterDistance(
+                'PROFILES_LENGTH',
+                self.tr('Profiles length'),
                 defaultValue=50,
                 parentParameterName='AXIS_LAYER'
             )
@@ -168,30 +177,65 @@ class CrossProfiles(QgsProcessingAlgorithm):
         
         axis_layer = self.parameterAsVectorLayer(parameters, 'AXIS_LAYER', context)
         
-        # # delete all fields from AXIS_LAYER's attribute table
-        # fields = []
-        # for field in axis_layer.fields():
-        #     fields.append(field.name())
+        # delete all fields from AXIS_LAYER's attribute table
+        fields = []
+        for field in axis_layer.fields():
+            fields.append(field.name())
             
-        # axis_layer = processing.run("qgis:deletecolumn",
-        #                             {'INPUT':axis_layer,
-        #                              'COLUMN':fields,
-        #                              'OUTPUT':'TEMPORARY_OUTPUT'},
-        #                             is_child_algorithm=True,
-        #                             context=context,
-        #                             feedback=feedback)['OUTPUT']
+        axis_layer = processing.run("qgis:deletecolumn",
+                                    {'INPUT':axis_layer,
+                                     'COLUMN':fields,
+                                     'OUTPUT':'TEMPORARY_OUTPUT'},
+                                    is_child_algorithm=True,
+                                    context=context,
+                                    feedback=feedback)['OUTPUT']
                                      
         
-        # invert_axis = self.parameterAsBool(parameters, 'INVERT_AXIS', context)
+        invert_axis = self.parameterAsBool(parameters, 'INVERT_AXIS', context)
         
-        # # if asked, invert the direction of the axis' line or polyline
-        # if invert_axis:
-        #     axis_layer = processing.run("native:reverselinedirection",
-        #                                 {'INPUT':axis_layer,
-        #                                  'OUTPUT':'TEMPORARY_OUTPUT'},
-        #                                 is_child_algorithm=True,
-        #                                 context=context,
-        #                                 feedback=feedback)['OUTPUT']
+        # if asked, invert the direction of the axis' line or polyline
+        if invert_axis:
+            axis_layer = processing.run("native:reverselinedirection",
+                                        {'INPUT':axis_layer,
+                                         'OUTPUT':'TEMPORARY_OUTPUT'},
+                                        is_child_algorithm=True,
+                                        context=context,
+                                        feedback=feedback)['OUTPUT']
+
+        # create the cross-profiles layer
+        cross_profiles = processing.run("saga:crossprofiles",
+                                        {'DEM':parameters['DTM'],
+                                         'LINES':axis_layer,
+                                         'PROFILES':'TEMPORARY_OUTPUT',
+                                         'DIST_LINE':parameters['DIST_BETWEEN_PROFILES'],
+                                         'DIST_PROFILE':parameters['PROFILES_LENGTH'],
+                                         'NUM_PROFILE':3,
+                                         'INTERPOLATION':3,
+                                         'OUTPUT':0})['PROFILES']
+
+        # clip the cross-profiles with the extent layer
+        extent_layer = self.parameterAsVectorLayer(parameters, 'EXTENT', context)
+
+        if extent_layer.isValid():
+            cross_profiles = processing.run("native:clip",
+                                            {'INPUT':cross_profiles,
+                                             'OVERLAY':extent_layer,
+                                             'OUTPUT':'TEMPORARY_OUTPUT'})['OUTPUT']
+
+        # add regularly spaced vertices to the cross-profiles
+        cross_profiles = processing.run("native:densifygeometriesgivenaninterval",
+                                        {'INPUT':cross_profiles,
+                                         'INTERVAL':parameters['SUBDIVISIONS'],
+                                         'OUTPUT':'TEMPORARY_OUTPUT'})['OUTPUT']
+
+        # set ;cross-profiles vertices' Z value from the DTM
+        cross_profiles = processing.run("native:setzfromraster",
+                                        {'INPUT':cross_profiles,
+                                         'RASTER':parameters['DTM'],
+                                         'BAND':parameters['DTM_BAND'],
+                                         'NODATA':0,
+                                         'SCALE':1,
+                                         'OUTPUT':'TEMPORARY_OUTPUT'})['OUTPUT']                               
         
         # projected_layer = self.parameterAsVectorLayer(parameters, 'PROJECTED_LAYER', context)        
         
@@ -274,4 +318,4 @@ class CrossProfiles(QgsProcessingAlgorithm):
                                          
         # # return the results of the algorithm
         # return {'OUTPUT':projected_layer}
-        return {'OUTPUT':axis_layer}
+        return {'OUTPUT':cross_profiles}
