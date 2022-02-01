@@ -213,6 +213,19 @@ class CrossProfiles(QgsProcessingAlgorithm):
                                         context=context,
                                         feedback=feedback)['PROFILES']
 
+        # create a new field 'dist' in cross-profiles layer attribute table
+        cross_profiles = processing.run("native:fieldcalculator",
+                                        {'INPUT':cross_profiles,
+                                         'FIELD_NAME':'dist',
+                                         'FIELD_TYPE':0,
+                                         'FIELD_LENGTH':10,
+                                         'FIELD_PRECISION':3,
+                                         'FORMULA':' \"ID\" * '+str(parameters['DIST_BETWEEN_PROFILES']),
+                                         'OUTPUT':'TEMPORARY_OUTPUT'},
+                                        is_child_algorithm=True,
+                                        context=context,
+                                        feedback=feedback)['OUTPUT']
+
         # clip the cross-profiles with the extent layer
         extent_layer = self.parameterAsVectorLayer(parameters, 'EXTENT', context)
 
