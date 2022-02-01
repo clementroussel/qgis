@@ -17,4 +17,4 @@ Generate regularly spaced cross-profiles along an axis.
 
 ## Output
 
-Cross-profiles layer.
+A cross-profiles layer whose attribute table contains a field 'dist' and a field 'z min' that can be used to approximate a longitudinal profile.
