@@ -7,7 +7,7 @@
 Orthogonal projection of a line or polyline layer onto another line or multiline vector layer.
 
 <p align="center">
-   <img src="polylinetProjection_figure.png" alt="polyline projection"/>
+   <img src="polylineProjection_figure.png" alt="polyline projection"/>
 </p>
 
 ## Inputs
