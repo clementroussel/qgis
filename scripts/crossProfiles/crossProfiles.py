@@ -211,7 +211,10 @@ class CrossProfiles(QgsProcessingAlgorithm):
                                          'DIST_PROFILE':parameters['PROFILES_LENGTH'],
                                          'NUM_PROFILE':3,
                                          'INTERPOLATION':3,
-                                         'OUTPUT':0})['PROFILES']
+                                         'OUTPUT':0},
+                                        is_child_algorithm=True,
+                                        context=context,
+                                        feedback=feedback)['OUTPUT']
 
         # clip the cross-profiles with the extent layer
         extent_layer = self.parameterAsVectorLayer(parameters, 'EXTENT', context)
@@ -220,13 +223,19 @@ class CrossProfiles(QgsProcessingAlgorithm):
             cross_profiles = processing.run("native:clip",
                                             {'INPUT':cross_profiles,
                                              'OVERLAY':extent_layer,
-                                             'OUTPUT':'TEMPORARY_OUTPUT'})['OUTPUT']
+                                             'OUTPUT':'TEMPORARY_OUTPUT'},
+                                           is_child_algorithm=True,
+                                           context=context,
+                                           feedback=feedback)['OUTPUT']
 
         # add regularly spaced vertices to the cross-profiles
         cross_profiles = processing.run("native:densifygeometriesgivenaninterval",
                                         {'INPUT':cross_profiles,
                                          'INTERVAL':parameters['SUBDIVISIONS'],
-                                         'OUTPUT':'TEMPORARY_OUTPUT'})['OUTPUT']
+                                         'OUTPUT':'TEMPORARY_OUTPUT'},
+                                        is_child_algorithm=True,
+                                        context=context,
+                                        feedback=feedback)['OUTPUT']
 
         # set ;cross-profiles vertices' Z value from the DTM
         cross_profiles = processing.run("native:setzfromraster",
@@ -235,7 +244,10 @@ class CrossProfiles(QgsProcessingAlgorithm):
                                          'BAND':parameters['DTM_BAND'],
                                          'NODATA':0,
                                          'SCALE':1,
-                                         'OUTPUT':'TEMPORARY_OUTPUT'})['OUTPUT']                               
+                                         'OUTPUT':'TEMPORARY_OUTPUT'},
+                                        is_child_algorithm=True,
+                                        context=context,
+                                        feedback=feedback)['OUTPUT']                               
         
         # projected_layer = self.parameterAsVectorLayer(parameters, 'PROJECTED_LAYER', context)        
         
