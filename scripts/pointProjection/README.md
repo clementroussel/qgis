@@ -6,6 +6,8 @@
 
 Orthogonal projection of a point layer onto a line or multiline vector layer.
 
+![point projection](pointProjection_figure.png)
+
 ## Inputs
 
 - Axis layer : Should contain a single line or multiline feature onto which points will be projected.
