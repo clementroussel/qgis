@@ -10,7 +10,7 @@
 *                                                                         *
 ***************************************************************************
 
-- latest changes : 2022-01-27
+- latest changes : 2022-02-01
 """
 
 from qgis.PyQt.QtCore import QCoreApplication
@@ -20,6 +20,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterVectorLayer,
+                       QgsProcessingParameterDistance,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterField,
                        QgsProcessingParameterRasterLayer,
@@ -29,7 +30,7 @@ from qgis.core import (QgsProcessing,
 from qgis import processing
 
 
-class PointProjection(QgsProcessingAlgorithm):
+class CrossProfiles(QgsProcessingAlgorithm):
     """
     Here is the class documentation.
     """
@@ -41,19 +42,19 @@ class PointProjection(QgsProcessingAlgorithm):
         return QCoreApplication.translate('Processing', string)
 
     def createInstance(self):
-        return PointProjection()
+        return CrossProfiles()
 
     def name(self):
         """
         Returns the algorithm name, used for identifying the algorithm.
         """
-        return 'point projection'
+        return 'cross profiles'
 
     def displayName(self):
         """
         Returns the translated algorithm name.
         """
-        return self.tr('Point Projection')
+        return self.tr('Cross Profiles')
 
     def group(self):
         """
@@ -108,23 +109,22 @@ class PointProjection(QgsProcessingAlgorithm):
                 False
             )
         )
-        
+
         self.addParameter(
-            QgsProcessingParameterVectorLayer(
-                'PROJECTED_LAYER',
-                self.tr('Projected layer'),
-                [QgsProcessing.TypeVectorPoint]
+            QgsProcessingParameterDistance(
+                'DIST_BETWEEN_PROFILES',
+                self.tr('Distance between two profiles'),
+                defaultValue=50,
+                parentParameterName='AXIS_LAYER'
             )
         )
-        
+
         self.addParameter(
-            QgsProcessingParameterField(
-                'KEPT_FIELDS',
-                self.tr('Fields to keep'),
-                allowMultiple=True,
-                defaultValue=[],
-                optional=True,
-                parentLayerParameterName='PROJECTED_LAYER'
+            QgsProcessingParameterVectorLayer(
+                'EXTENT',
+                self.tr('Extent layer'),
+                [QgsProcessing.TypeVectorPolygon],
+                optional=True
             )
         )
         
@@ -132,7 +132,7 @@ class PointProjection(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 'DTM',
                 self.tr('Digital Terrain Model (DTM)'),
-                optional=True
+                optional=False
             )
         )
         
@@ -142,6 +142,15 @@ class PointProjection(QgsProcessingAlgorithm):
                 self.tr('DTM Raster Band'),
                 defaultValue=1,
                 parentLayerParameterName='DTM'
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterDistance(
+                'SUBDIVISIONS',
+                self.tr('Profile subdivision distance'),
+                defaultValue=0.10,
+                parentParameterName='AXIS_LAYER'
             )
         )
 
@@ -159,109 +168,110 @@ class PointProjection(QgsProcessingAlgorithm):
         
         axis_layer = self.parameterAsVectorLayer(parameters, 'AXIS_LAYER', context)
         
-        # delete all fields from AXIS_LAYER's attribute table
-        fields = []
-        for field in axis_layer.fields():
-            fields.append(field.name())
+        # # delete all fields from AXIS_LAYER's attribute table
+        # fields = []
+        # for field in axis_layer.fields():
+        #     fields.append(field.name())
             
-        axis_layer = processing.run("qgis:deletecolumn",
-                                    {'INPUT':axis_layer,
-                                     'COLUMN':fields,
-                                     'OUTPUT':'TEMPORARY_OUTPUT'},
-                                    is_child_algorithm=True,
-                                    context=context,
-                                    feedback=feedback)['OUTPUT']
+        # axis_layer = processing.run("qgis:deletecolumn",
+        #                             {'INPUT':axis_layer,
+        #                              'COLUMN':fields,
+        #                              'OUTPUT':'TEMPORARY_OUTPUT'},
+        #                             is_child_algorithm=True,
+        #                             context=context,
+        #                             feedback=feedback)['OUTPUT']
                                      
         
-        invert_axis = self.parameterAsBool(parameters, 'INVERT_AXIS', context)
+        # invert_axis = self.parameterAsBool(parameters, 'INVERT_AXIS', context)
         
-        # if asked, invert the direction of the axis' line or polyline
-        if invert_axis:
-            axis_layer = processing.run("native:reverselinedirection",
-                                        {'INPUT':axis_layer,
-                                         'OUTPUT':'TEMPORARY_OUTPUT'},
-                                        is_child_algorithm=True,
-                                        context=context,
-                                        feedback=feedback)['OUTPUT']
+        # # if asked, invert the direction of the axis' line or polyline
+        # if invert_axis:
+        #     axis_layer = processing.run("native:reverselinedirection",
+        #                                 {'INPUT':axis_layer,
+        #                                  'OUTPUT':'TEMPORARY_OUTPUT'},
+        #                                 is_child_algorithm=True,
+        #                                 context=context,
+        #                                 feedback=feedback)['OUTPUT']
         
-        projected_layer = self.parameterAsVectorLayer(parameters, 'PROJECTED_LAYER', context)        
+        # projected_layer = self.parameterAsVectorLayer(parameters, 'PROJECTED_LAYER', context)        
         
-        # keep only fields in KEPT_FIELDS from PROJECTED_LAYER's attribute table
-        fields = []
-        for field in projected_layer.fields():
-            fields.append(field.name())
+        # # keep only fields in KEPT_FIELDS from PROJECTED_LAYER's attribute table
+        # fields = []
+        # for field in projected_layer.fields():
+        #     fields.append(field.name())
             
-        removed_fields = [field for field in fields if field not in parameters['KEPT_FIELDS']]
-        if len(removed_fields) > 0:
-            projected_layer = processing.run("qgis:deletecolumn",
-                                             {'INPUT':projected_layer,
-                                              'COLUMN':removed_fields,
-                                              'OUTPUT':'TEMPORARY_OUTPUT'},
-                                             is_child_algorithm=True,
-                                             context=context,
-                                             feedback=feedback)['OUTPUT']
+        # removed_fields = [field for field in fields if field not in parameters['KEPT_FIELDS']]
+        # if len(removed_fields) > 0:
+        #     projected_layer = processing.run("qgis:deletecolumn",
+        #                                      {'INPUT':projected_layer,
+        #                                       'COLUMN':removed_fields,
+        #                                       'OUTPUT':'TEMPORARY_OUTPUT'},
+        #                                      is_child_algorithm=True,
+        #                                      context=context,
+        #                                      feedback=feedback)['OUTPUT']
                                              
-        # add a new field "dist" to PROJECTED_LAYER's attribute table
-        projected_layer = processing.run("native:addfieldtoattributestable",
-                                         {'INPUT':projected_layer,
-                                          'FIELD_NAME':'dist',
-                                          'FIELD_TYPE':1,
-                                          'FIELD_LENGTH':10,
-                                          'FIELD_PRECISION':3,
-                                          'OUTPUT':'TEMPORARY_OUTPUT'},
-                                         is_child_algorithm=True,
-                                         context=context,
-                                         feedback=feedback)['OUTPUT']
+        # # add a new field "dist" to PROJECTED_LAYER's attribute table
+        # projected_layer = processing.run("native:addfieldtoattributestable",
+        #                                  {'INPUT':projected_layer,
+        #                                   'FIELD_NAME':'dist',
+        #                                   'FIELD_TYPE':1,
+        #                                   'FIELD_LENGTH':10,
+        #                                   'FIELD_PRECISION':3,
+        #                                   'OUTPUT':'TEMPORARY_OUTPUT'},
+        #                                  is_child_algorithm=True,
+        #                                  context=context,
+        #                                  feedback=feedback)['OUTPUT']
                                          
-        # if DTM has been set, set PROJECTED_LAYER's Z value from it
-        dtm = self.parameterAsRasterLayer(parameters, 'DTM', context)
+        # # if DTM has been set, set PROJECTED_LAYER's Z value from it
+        # dtm = self.parameterAsRasterLayer(parameters, 'DTM', context)
         
-        if not parameters['DTM'] == None:
-            projected_layer = processing.run("native:setzfromraster",
-                                             {'INPUT':projected_layer,
-                                              'RASTER':dtm,
-                                              'BAND':parameters['DTM_BAND'],
-                                              'NODATA':0,
-                                              'SCALE':1,
-                                              'OUTPUT':'TEMPORARY_OUTPUT'},
-                                             is_child_algorithm=True,
-                                             context=context,
-                                             feedback=feedback)['OUTPUT']
+        # if not parameters['DTM'] == None:
+        #     projected_layer = processing.run("native:setzfromraster",
+        #                                      {'INPUT':projected_layer,
+        #                                       'RASTER':dtm,
+        #                                       'BAND':parameters['DTM_BAND'],
+        #                                       'NODATA':0,
+        #                                       'SCALE':1,
+        #                                       'OUTPUT':'TEMPORARY_OUTPUT'},
+        #                                      is_child_algorithm=True,
+        #                                      context=context,
+        #                                      feedback=feedback)['OUTPUT']
                                             
-        projected_layer = processing.run("native:fieldcalculator",
-                                         {'INPUT':projected_layer,
-                                          'FIELD_NAME':'Z',
-                                          'FIELD_TYPE':0,
-                                          'FIELD_LENGTH':10,
-                                          'FIELD_PRECISION':3,
-                                          'FORMULA':'z($geometry)',
-                                          'OUTPUT':'TEMPORARY_OUTPUT'},
-                                         is_child_algorithm=True,
-                                         context=context,
-                                         feedback=feedback)['OUTPUT']
+        # projected_layer = processing.run("native:fieldcalculator",
+        #                                  {'INPUT':projected_layer,
+        #                                   'FIELD_NAME':'Z',
+        #                                   'FIELD_TYPE':0,
+        #                                   'FIELD_LENGTH':10,
+        #                                   'FIELD_PRECISION':3,
+        #                                   'FORMULA':'z($geometry)',
+        #                                   'OUTPUT':'TEMPORARY_OUTPUT'},
+        #                                  is_child_algorithm=True,
+        #                                  context=context,
+        #                                  feedback=feedback)['OUTPUT']
                                          
-        projected_layer = processing.run("grass7:v.distance",
-                                         {'from':projected_layer,
-                                          'from_type':[0],
-                                          'to':axis_layer,
-                                          'to_type':[1],
-                                          'dmax':-1,
-                                          'dmin':-1,
-                                          'upload':[4],
-                                          'column':['dist'],
-                                          'to_column':'',
-                                          'from_output':parameters['OUTPUT'],
-                                          'output':'TEMPORARY_OUTPUT',
-                                          'GRASS_REGION_PARAMETER':None,
-                                          'GRASS_SNAP_TOLERANCE_PARAMETER':-1,
-                                          'GRASS_MIN_AREA_PARAMETER':0.0001,
-                                          'GRASS_OUTPUT_TYPE_PARAMETER':1,
-                                          'GRASS_VECTOR_DSCO':'',
-                                          'GRASS_VECTOR_LCO':'',
-                                          'GRASS_VECTOR_EXPORT_NOCAT':False},
-                                         is_child_algorithm=True,
-                                         context=context,
-                                         feedback=feedback)['from_output']
+        # projected_layer = processing.run("grass7:v.distance",
+        #                                  {'from':projected_layer,
+        #                                   'from_type':[0],
+        #                                   'to':axis_layer,
+        #                                   'to_type':[1],
+        #                                   'dmax':-1,
+        #                                   'dmin':-1,
+        #                                   'upload':[4],
+        #                                   'column':['dist'],
+        #                                   'to_column':'',
+        #                                   'from_output':parameters['OUTPUT'],
+        #                                   'output':'TEMPORARY_OUTPUT',
+        #                                   'GRASS_REGION_PARAMETER':None,
+        #                                   'GRASS_SNAP_TOLERANCE_PARAMETER':-1,
+        #                                   'GRASS_MIN_AREA_PARAMETER':0.0001,
+        #                                   'GRASS_OUTPUT_TYPE_PARAMETER':1,
+        #                                   'GRASS_VECTOR_DSCO':'',
+        #                                   'GRASS_VECTOR_LCO':'',
+        #                                   'GRASS_VECTOR_EXPORT_NOCAT':False},
+        #                                  is_child_algorithm=True,
+        #                                  context=context,
+        #                                  feedback=feedback)['from_output']
                                          
-        # return the results of the algorithm
-        return {'OUTPUT':projected_layer}
+        # # return the results of the algorithm
+        # return {'OUTPUT':projected_layer}
+        return {'OUTPUT':axis_layer}
