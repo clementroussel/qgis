@@ -23,7 +23,8 @@
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtWidgets import QAction, QFileDialog
+from qgis.core import QgsProject, QgsWkbTypes,QgsVectorLayer, Qgis
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -179,6 +180,32 @@ class ProfileExport:
                 action)
             self.iface.removeToolBarIcon(action)
 
+    def updateAttributesComboBox(self, i):
+        selectedLayer = self.layers[i].layer()
+        if isinstance(selectedLayer, QgsVectorLayer):
+            fieldnames = [field.name() for field in selectedLayer.fields()]
+
+            self.dlg.xComboBox.clear()
+            self.dlg.xComboBox.addItems(fieldnames)
+
+            self.dlg.zComboBox.clear()
+            self.dlg.zComboBox.addItems(fieldnames)
+
+            self.dlg.annotationsComboBox.clear()
+            self.dlg.annotationsComboBox.addItems(fieldnames)
+
+    def updateAnnotationsComboBox(self, checked):
+        if checked:
+            self.dlg.annotationsComboBox.setEnabled(True)
+        else:
+            self.dlg.annotationsComboBox.setEnabled(False)
+
+    def selectOutputFile(self):
+        filename, _filter = QFileDialog.getSaveFileName(self.dlg, "output file", "profile.txt", "text file (.txt)")
+        filename = filename.split(".")[0]
+        filename += ".txt"
+        self.dlg.pathLineEdit.setText(filename)
+
 
     def run(self):
         """Run method that performs all the real work"""
@@ -188,6 +215,17 @@ class ProfileExport:
         if self.first_start == True:
             self.first_start = False
             self.dlg = ProfileExportDialog()
+            self.dlg.annotationsComboBox.setEnabled(False)
+            self.dlg.pathPushButton.clicked.connect(self.selectOutputFile)
+            self.dlg.layersComboBox.currentIndexChanged.connect(self.updateAttributesComboBox)
+            self.dlg.includeCheckBox.stateChanged.connect(self.updateAnnotationsComboBox)
+
+
+        self.layers = QgsProject.instance().layerTreeRoot().children()
+        #layers = [layer for layer in layers if isinstance(layer.layer(), QgsVectorLayer)]
+        self.dlg.layersComboBox.clear()
+        #self.dlg.layersComboBox.addItems([layer.name() for layer in layers if layer.layer().wkbType()==QgsWkbTypes.Point])
+        self.dlg.layersComboBox.addItems([layer.name() for layer in self.layers])
 
         # show the dialog
         self.dlg.show()
@@ -197,4 +235,35 @@ class ProfileExport:
         if result:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
-            pass
+            filename = self.dlg.pathLineEdit.text()
+            with open(filename, 'w') as outputFile:
+                layerIndex = self.dlg.layersComboBox.currentIndex()
+                layer = self.layers[layerIndex].layer()
+                xFieldName = self.dlg.xComboBox.currentText()
+                zFieldName = self.dlg.zComboBox.currentText()
+                annotationFieldName = self.dlg.annotationsComboBox.currentText()
+
+                data = []
+
+                for feature in layer.getFeatures():
+                    data.append((float(feature[xFieldName]), float(feature[zFieldName]), str(feature[annotationFieldName])))
+                    data.sort(key=lambda item: item[0])
+
+                if not self.dlg.includeCheckBox.isChecked():
+                    line = "\t".join(["X", "Z"]) + "\n"
+                    outputFile.write(line)
+
+                    for x, z, annotation in data:
+                        line = "\t".join([str(x), str(z)])  + "\n"
+                        outputFile.write(line)
+
+                else:
+                    line = "\t".join(["X", "Z", "Annotation"]) + "\n"
+                    outputFile.write(line)
+
+                    for x, z, annotation in data:
+                        line = "\t".join([str(x), str(z), annotation])  + "\n"
+                        outputFile.write(line)
+
+            self.iface.messageBar().pushMessage("Success", "Output file written at " + filename, level=Qgis.Success, duration=3)
+ 
