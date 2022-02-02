@@ -11,6 +11,7 @@
 ***************************************************************************
 
 - latest changes : 2022-02-02
+- https://github.com/clementroussel/qgis/tree/main/scripts/polylineProjection
 """
 
 from qgis.PyQt.QtCore import QCoreApplication
@@ -80,7 +81,7 @@ class PolylineProjection(QgsProcessingAlgorithm):
         <p>Axis layer : Should contain a single line or multiline feature onto which points will be projected.<\p>
         <p>Projected layer : Should contain a single line or multiline layer to be projected.<\p>
         <p>Digital Terrain Model (DTM) : If provided, projected layer vertices' Z value will be extracted from it. Else, the algorithm will try to extract the Z value of the projected layer vertices' geometry.<\p>
-        <p>Interpolate : If checked, the projected layer will be interpolated on the DTM and, consequently, new vertices will be created.<\p>
+        <p>Interpolate : If checked, the projected layer will be interpolated on the DTM and, consequently, new vertices will be created. Warning : doesn't work with SAGA 2.3.2 but works with SAGA 7.8.2<\p>
         <h2>Output<\h2>
         <p>The output layer is a point layer whose attribute table contains a field 'dist' which corresponds to the curvilinear distance of the projected vertices onto the axis.<\p>
         <\body><\html>
