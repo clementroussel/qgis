@@ -15,6 +15,7 @@ Orthogonal projection of a line or polyline layer onto another line or multiline
 - Axis layer : Should contain a single line or multiline feature onto which points will be projected.
 - Projected layer : Should contain a single line or multiline feature to be projected.
 - Digital Terrain Model (DTM) : If provided, projected layer vertices' Z value will be extracted from it. Else, the algorithm will try to extract the Z value of the projected layer vertices' geometry.
+- Interpolate : If checked, the projected layer will be interpolated on the DTM and, consequently, new vertices will be created.
 
 ## Output
 
