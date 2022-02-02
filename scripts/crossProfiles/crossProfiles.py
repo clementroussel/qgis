@@ -12,6 +12,7 @@
 
 - latest changes : 2022-02-01
 - https://github.com/clementroussel/qgis/tree/main/scripts/crossProfiles
+- warnings : requires SAGA 7.8.2
 """
 
 from qgis.PyQt.QtCore import QCoreApplication
