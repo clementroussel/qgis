@@ -16,18 +16,12 @@
 
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterVectorLayer,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterBand,
-                       QgsProcessingParameterFeatureSink,
-                       QgsWkbTypes,
-                       QgsVectorLayer)
+                       QgsProcessingParameterFeatureSink)
 from qgis import processing
 
 
