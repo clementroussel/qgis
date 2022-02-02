@@ -11,21 +11,18 @@
 ***************************************************************************
 
 - latest changes : 2022-01-27
+- 
 """
 
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterVectorLayer,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterField,
                        QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterBand,
-                       QgsProcessingParameterFeatureSink,
-                       QgsWkbTypes)
+                       QgsProcessingParameterFeatureSink)
 from qgis import processing
 
 
