@@ -20,6 +20,9 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+
+ - last changes : 2022-02-02
+ - https://github.com/clementroussel/qgis/tree/main/plugins/profile_export
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
