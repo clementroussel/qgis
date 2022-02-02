@@ -11,6 +11,7 @@
 ***************************************************************************
 
 - latest changes : 2022-02-01
+- https://github.com/clementroussel/qgis/tree/main/scripts/crossProfiles
 """
 
 from qgis.PyQt.QtCore import QCoreApplication
