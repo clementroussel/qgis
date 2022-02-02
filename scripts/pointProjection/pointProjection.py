@@ -11,7 +11,7 @@
 ***************************************************************************
 
 - latest changes : 2022-01-27
-- 
+- https://github.com/clementroussel/qgis/tree/main/scripts/pointProjection
 """
 
 from qgis.PyQt.QtCore import QCoreApplication
