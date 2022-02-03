@@ -20,16 +20,69 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+
+ - last changes : 2022-02-03
+ - https://github.com/clementroussel/qgis/tree/main/plugins/cross_profiles_viewer
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from audioop import cross
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt, QLocale
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtWidgets import QAction, QVBoxLayout, QLabel, QComboBox, QGroupBox, QGridLayout, QDoubleSpinBox
+from qgis.core import QgsProject , QgsVectorLayer
+
+from matplotlib.backends.backend_qt5agg import FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib import pyplot as plt
+from matplotlib.ticker import AutoMinorLocator
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+
+import math
 
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
 from .cross_profiles_viewer_dialog import CrossProfilesViewerDialog
 import os.path
+
+class Canvas(FigureCanvas):
+    def __init__(self, parent, figure=Figure(figsize=(15/2.54, 15/2.54))):
+        super().__init__(figure)
+
+    def initialise(self):
+        self.ax = self.figure.add_subplot()
+        self.figure.tight_layout()
+
+    def updatePlot(self, dist, z, text, ratio):
+        self.ax.clear()
+        self.ax.set_title("Profile : {}".format(text),
+                          fontdict={'fontsize': 10,
+                                    'color': "Black"})
+        line, = self.ax.plot(dist,
+                             z,
+                             linewidth=0.8,
+                             color="Green")
+
+        self.ax.tick_params(axis='x', labelsize=10)
+        self.ax.set_xlabel("distance (m)",
+                           fontdict={'fontsize': 10})
+        self.ax.xaxis.set_minor_locator(AutoMinorLocator())
+
+        self.ax.tick_params(axis='y', labelsize=10)
+        self.ax.set_ylabel("elevation (m)",
+                           fontdict={'fontsize': 10})
+        self.ax.yaxis.set_minor_locator(AutoMinorLocator())
+
+        self.ax.set_aspect(ratio)
+
+        self.ax.grid(visible=True,
+                     which='both',
+                     axis='both',
+                     linestyle='--',
+                     linewidth=0.6,
+                     alpha=0.4)
+
+        self.figure.tight_layout()
+        self.draw()
 
 
 class CrossProfilesViewer:
@@ -179,6 +232,53 @@ class CrossProfilesViewer:
                 action)
             self.iface.removeToolBarIcon(action)
 
+    def updateLayerComboBox(self):
+        self.layers = QgsProject.instance().layerTreeRoot().children()
+        self.layersComboBox.clear()
+        self.layersComboBox.addItems([layer.name() for layer in self.layers])
+
+    def updateIdFieldComboBox(self, i):
+        self.idFieldComboBox.clear()
+        self.selectedLayer = self.layers[i].layer()
+        if isinstance(self.selectedLayer, QgsVectorLayer):
+            fieldnames = [field.name() for field in self.selectedLayer.fields()]
+            self.idFieldComboBox.addItems(fieldnames)
+
+    def updateCrossProfileComboBox(self, text):
+        self.crossProfileComboBox.clear()
+        try:
+            for feature in self.selectedLayer.getFeatures():
+                    self.crossProfileComboBox.addItem(str(feature[text]))
+        except:
+            pass
+
+    def updateCanvas(self):
+        text = self.crossProfileComboBox.currentText()
+        try:
+            for feature in self.selectedLayer.getFeatures():
+                if str(feature[self.idFieldComboBox.currentText()]) == text:
+                    crossProfileFeature = feature
+
+            x = []
+            y = []
+            z = []
+            for point in crossProfileFeature.geometry().constGet():
+                x.append(point.x())
+                y.append(point.y())
+                z.append(point.z())
+
+            x0 = x[0]
+            y0 = y[0]
+
+            dist = [math.sqrt((x0 - x)**2 + (y0 - y)**2) for x, y in zip(x, y)]
+
+            ratio = self.ratio.value()
+            self.canvas.updatePlot(dist, z, text, ratio)
+        except:
+            self.canvas.ax.clear()
+            self.canvas.figure.tight_layout()
+            self.canvas.draw()
+
 
     def run(self):
         """Run method that performs all the real work"""
@@ -188,6 +288,77 @@ class CrossProfilesViewer:
         if self.first_start == True:
             self.first_start = False
             self.dlg = CrossProfilesViewerDialog()
+
+            self.dlg.setMinimumWidth(1200)
+            self.dlg.setMinimumHeight(900)
+
+            mainLayout = QVBoxLayout()
+
+            group = QGroupBox("Parameters")
+            subLayout = QGridLayout()
+
+            label = QLabel("Cross-profiles layer :")
+            label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            subLayout.addWidget(label, 0, 0)
+
+            self.layersComboBox = QComboBox()
+            self.layersComboBox.currentIndexChanged.connect(self.updateIdFieldComboBox)
+            subLayout.addWidget(self.layersComboBox, 0, 1)
+
+            subLayout.addWidget(QLabel(), 0, 2)
+
+            label = QLabel("ID field name :")
+            label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            subLayout.addWidget(label, 1, 0)
+
+            self.idFieldComboBox = QComboBox()
+            self.idFieldComboBox.currentTextChanged.connect(self.updateCrossProfileComboBox)
+            subLayout.addWidget(self.idFieldComboBox, 1, 1)
+
+            label = QLabel("Cross-profile to plot :")
+            label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            subLayout.addWidget(label, 2, 0)
+
+            self.crossProfileComboBox = QComboBox()
+            self.crossProfileComboBox.currentTextChanged.connect(self.updateCanvas)
+            subLayout.addWidget(self.crossProfileComboBox, 2, 1)
+
+            label = QLabel("Ratio :")
+            label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            subLayout.addWidget(label, 3, 0)
+
+            self.ratio = QDoubleSpinBox()
+            self.ratio.setLocale(QLocale('English'))
+            self.ratio.setRange(0.1, 100.0)
+            self.ratio.setSingleStep(0.1)
+            self.ratio.setDecimals(1)
+            self.ratio.setValue(1)
+            self.ratio.valueChanged.connect(self.updateCanvas)
+            subLayout.addWidget(self.ratio, 3, 1)
+
+
+            group.setLayout(subLayout)
+            group.setMaximumHeight(150)
+            mainLayout.addWidget(group)
+            
+            group = QGroupBox("Viewer")
+            subLayout = QGridLayout()
+            self.canvas = Canvas(parent=self.dlg)
+            subLayout.addWidget(self.canvas, 0, 0)
+            self.navigationBar = NavigationToolbar(self.canvas, self.dlg)
+            subLayout.addWidget(self.navigationBar, 1, 0)
+            group.setLayout(subLayout)
+            mainLayout.addWidget(group)
+
+            mainLayout.addWidget(self.dlg.button_box)
+            self.dlg.setLayout(mainLayout)
+
+            self.canvas.initialise()
+            self.updateLayerComboBox()
+
+        else:
+            self.canvas.ax.clear()
+            self.updateLayerComboBox()  
 
         # show the dialog
         self.dlg.show()
