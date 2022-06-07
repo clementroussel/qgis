@@ -1,1 +1,1 @@
-# Tools, scripts and plugins for QGIS
+# Processing algorithms, scripts and plugins for QGIS
