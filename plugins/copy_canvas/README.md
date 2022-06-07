@@ -1,6 +1,8 @@
 # Copy canvas plugin
 ---
 
+## Description
+
 **A simple plugin which allows to copy the map canvas to the clipboard.**
 
 ## Installation
