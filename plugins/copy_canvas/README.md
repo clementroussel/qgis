@@ -1,0 +1,1 @@
+# Copy canvas plugin
