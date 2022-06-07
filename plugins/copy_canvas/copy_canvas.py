@@ -22,7 +22,7 @@
  ***************************************************************************/
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
-from qgis.PyQt.QtGui import QIcon, QImage
+from qgis.PyQt.QtGui import QIcon, QImage, QKeySequence
 from qgis.PyQt.QtWidgets import QAction, QApplication
 
 # Initialize Qt resources from file resources.py
@@ -137,6 +137,7 @@ class CopyCanvas:
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
         action.setEnabled(enabled_flag)
+        action.setShortcut(QKeySequence("Ctrl+Space"))
 
         if status_tip is not None:
             action.setStatusTip(status_tip)
