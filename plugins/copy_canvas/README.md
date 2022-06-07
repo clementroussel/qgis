@@ -8,7 +8,7 @@
 ## Installation
 
 1. Download the plugin [copy canvas](https://sourceforge.net/projects/qgis-plugins/files/copy_canvas.zip/download).
-2. Unzip it in your QGIS plugin directory (e.g. "C:\Users\<username>\AppData\Roaming\QGIS\QGIS3\profiles\<default>\python\plugins" on Windows).
+2. Unzip it in your QGIS plugin directory (e.g. "C:\Users\*username*\AppData\Roaming\QGIS\QGIS3\profiles\*default*\python\plugins" on Windows).
 3. Run QGIS and activate the plugin.
 
 ## How to use the plugin
