@@ -164,7 +164,7 @@ class ExportCanvas:
         icon_path = ':/plugins/export_canvas/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'Export map canvas'),
+            text=self.tr(u'Export map canvas as a PNG file'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
@@ -176,7 +176,7 @@ class ExportCanvas:
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginMenu(
-                self.tr(u'&Export Canvas'),
+                self.tr(u'&Export map canvas as a PNG file'),
                 action)
             self.iface.removeToolBarIcon(action)
 

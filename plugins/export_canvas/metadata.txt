@@ -5,12 +5,12 @@
 [general]
 name=Export Canvas
 qgisMinimumVersion=3.0
-description=Export the map canvas.
+description=Export the map canvas as a PNG file.
 version=22.06
 author=Clément Roussel
 email=clement.roussel@onf.fr
 
-about=This plugin allow to export the map canvas.
+about=This plugin allow to export the map canvas as a PNG file.
 
 tracker=http://bugs
 repository=http://repo
@@ -23,7 +23,7 @@ hasProcessingProvider=no
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=python
+tags=python, export, canvas
 
 homepage=https://github.com/clementroussel/qgis/tree/main/plugins/export_canvas
 category=Plugins
