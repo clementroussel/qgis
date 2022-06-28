@@ -23,7 +23,8 @@
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtWidgets import QAction, QFileDialog
+from qgis.utils import iface
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -190,11 +191,18 @@ class ExportCanvas:
             self.dlg = ExportCanvasDialog()
 
         # show the dialog
-        self.dlg.show()
+        # self.dlg.show()
         # Run the dialog event loop
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
-            pass
+            # pass
+            filename = self.dlg.selectedFiles()[0]
+            try:
+                iface.mapCanvas().saveAsImage(filename)
+            except:
+                pass
+        else:
+            return

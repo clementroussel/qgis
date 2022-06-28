@@ -32,7 +32,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'export_canvas_dialog_base.ui'))
 
 
-class ExportCanvasDialog(QtWidgets.QDialog, FORM_CLASS):
+class ExportCanvasDialog(QtWidgets.QFileDialog, FORM_CLASS):
     def __init__(self, parent=None):
         """Constructor."""
         super(ExportCanvasDialog, self).__init__(parent)
@@ -41,4 +41,9 @@ class ExportCanvasDialog(QtWidgets.QDialog, FORM_CLASS):
         # self.<objectname>, and you can use autoconnect slots - see
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
-        self.setupUi(self)
+        # self.setupUi(self)
+
+        self.setWindowTitle('Export map canvas')
+        self.setDefaultSuffix("png")
+        self.setNameFilter("PNG file (*.png)")
+        self.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
